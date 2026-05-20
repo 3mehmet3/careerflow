@@ -1,4 +1,4 @@
-const { validateRegisterInput, validateLoginInput } = require('../../src/services/authService');
+const { validateRegisterInput, validateLoginInput } = require('../src/services/authService');
 
 describe('authService - validateRegisterInput', () => {
   test('valid input returns no errors', () => {

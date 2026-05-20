@@ -1,5 +1,4 @@
-const { validateGoal } = require('../../src/services/goalService');
-
+const { validateGoal } = require('../src/services/goalService');
 describe('goalService - validateGoal', () => {
   test('valid goal returns no errors', () => {
     const errors = validateGoal({ title: 'Get promoted', priority: 'high', progress: 50, deadline: '2025-12-31' });

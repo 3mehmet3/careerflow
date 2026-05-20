@@ -1,4 +1,4 @@
-const { validateSkill } = require('../../src/services/skillService');
+const { validateSkill } = require('../src/services/skillService');
 
 describe('skillService - validateSkill', () => {
   test('valid skill returns no errors', () => {

@@ -1,5 +1,4 @@
-const { calculateSkillFitScore } = require('../../src/services/skillFitService');
-
+const { calculateSkillFitScore } = require('../src/services/skillFitService');
 describe('skillFitService - calculateSkillFitScore', () => {
   const userSkills = [
     { name: 'JavaScript', current_level: 70 },

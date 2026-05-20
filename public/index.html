@@ -13,20 +13,16 @@
   <div class="auth-box">
     <h1 class="brand">CareerFlow</h1>
     <p class="brand-sub">Your personal career management system</p>
-
     <div class="tab-row">
       <button class="tab active" data-tab="login">Login</button>
       <button class="tab" data-tab="register">Register</button>
     </div>
-
     <div id="auth-error" class="error-msg hidden"></div>
-
     <form id="login-form" class="auth-form">
       <input type="email" name="email" placeholder="Email" required/>
       <input type="password" name="password" placeholder="Password" required/>
       <button type="submit" class="btn-primary">Login</button>
     </form>
-
     <form id="register-form" class="auth-form hidden">
       <input type="text" name="name" placeholder="Full Name" required/>
       <input type="email" name="email" placeholder="Email" required/>
@@ -36,25 +32,72 @@
   </div>
 </div>
 
+<!-- Hamburger (mobile) -->
+<button id="hamburger" class="hamburger" aria-label="Open menu">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay"></div>
+
 <!-- Main App -->
 <div id="app" class="hidden">
   <nav class="sidebar">
     <div class="sidebar-brand">CareerFlow</div>
     <ul class="nav-links">
-      <li><a href="#" data-page="dashboard" class="nav-link active">Dashboard</a></li>
-      <li><a href="#" data-page="skills" class="nav-link">Skills</a></li>
-      <li><a href="#" data-page="goals" class="nav-link">Career Goals</a></li>
-      <li><a href="#" data-page="projects" class="nav-link">Projects</a></li>
+      <li>
+        <button data-page="dashboard" class="nav-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </button>
+      </li>
+      <li>
+        <button data-page="skills" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Skills
+        </button>
+      </li>
+      <li>
+        <button data-page="goals" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Career Goals
+        </button>
+      </li>
+      <li>
+        <button data-page="projects" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Projects
+        </button>
+      </li>
     </ul>
+    <div style="padding:0 0.5rem;margin-top:1rem">
+      <div style="font-size:0.8rem;color:var(--muted)">Logged in as</div>
+      <div id="user-name" style="font-size:0.9rem;font-weight:600;margin-top:2px"></div>
+    </div>
     <button id="logout-btn" class="btn-logout">Logout</button>
   </nav>
 
   <main class="main-content">
+
+    <!-- Dashboard -->
     <div id="page-dashboard" class="page">
-      <h2>Welcome back, <span id="user-name"></span></h2>
+      <div class="page-header"><h2>Dashboard</h2></div>
       <div class="stats-grid" id="stats-grid"></div>
+      <div class="dashboard-grid">
+        <div class="dash-card">
+          <h3>Top Skills</h3>
+          <div id="dash-skills"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Active Goals</h3>
+          <div id="dash-goals"></div>
+        </div>
+      </div>
     </div>
 
+    <!-- Skills -->
     <div id="page-skills" class="page hidden">
       <div class="page-header">
         <h2>Skills</h2>
@@ -72,6 +115,7 @@
       <div id="skills-list" class="card-grid"></div>
     </div>
 
+    <!-- Goals -->
     <div id="page-goals" class="page hidden">
       <div class="page-header">
         <h2>Career Goals</h2>
@@ -93,6 +137,7 @@
       <div id="goals-list" class="card-grid"></div>
     </div>
 
+    <!-- Projects -->
     <div id="page-projects" class="page hidden">
       <div class="page-header">
         <h2>Projects</h2>
@@ -100,6 +145,7 @@
       </div>
       <div id="projects-list" class="card-grid"></div>
     </div>
+
   </main>
 </div>
 

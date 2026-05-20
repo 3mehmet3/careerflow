@@ -22,27 +22,68 @@ async function loadSkills() {
     list.innerHTML = '<p class="empty-state">No skills found. Add your first skill!</p>';
     return;
   }
-  list.innerHTML = skills.map(s => `
+  list.innerHTML = skills.map(s => {
+    const pct = s.target_level ? Math.round(s.current_level / s.target_level * 100) : 0;
+    return `
     <div class="card">
       <div class="card-title">${s.name}</div>
       <div class="card-meta">${s.category} · ${statusBadge(s.status)}</div>
-      <div style="font-size:0.8rem;color:var(--muted)">Progress: ${s.current_level} / ${s.target_level}</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${s.target_level ? Math.round(s.current_level/s.target_level*100) : 0}%"></div></div>
+      <div class="slider-group">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--muted)">
+          <span>Current level</span><span>${s.current_level} / ${s.target_level}</span>
+        </div>
+        <div class="slider-row">
+          <input type="range" min="0" max="100" value="${s.current_level}"
+            oninput="updateSkillLevel(${s.id}, this.value, ${s.target_level})"
+            onchange="saveSkillLevel(${s.id}, this.value)"
+            id="slider-${s.id}" />
+          <span class="slider-val" id="sliderval-${s.id}">${s.current_level}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill ${s.status === 'completed' ? 'green' : ''}" id="prog-${s.id}" style="width:${pct}%"></div>
+        </div>
+      </div>
       ${s.notes ? `<div class="card-meta">${s.notes}</div>` : ''}
       <div class="card-actions">
         <button class="btn-secondary" onclick="openEditSkill(${JSON.stringify(s).replace(/"/g,'&quot;')})">Edit</button>
         <button class="btn-danger" onclick="deleteSkill(${s.id})">Delete</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
+}
+
+function updateSkillLevel(id, value, targetLevel) {
+  document.getElementById(`sliderval-${id}`).textContent = value;
+  const pct = targetLevel ? Math.round(value / targetLevel * 100) : 0;
+  document.getElementById(`prog-${id}`).style.width = Math.min(pct, 100) + '%';
+}
+
+async function saveSkillLevel(id, value) {
+  try {
+    await api.skills.update(id, { current_level: parseInt(value) });
+  } catch(e) { console.error('Could not save level', e); }
 }
 
 function skillForm(s = {}) {
   return `
     <div class="form-group"><label>Skill Name</label><input id="f-name" value="${s.name||''}" placeholder="e.g. JavaScript" /></div>
     <div class="form-group"><label>Category</label><input id="f-category" value="${s.category||''}" placeholder="e.g. Frontend" /></div>
-    <div class="form-group"><label>Current Level (0-100)</label><input id="f-current" type="number" min="0" max="100" value="${s.current_level??0}" /></div>
-    <div class="form-group"><label>Target Level (0-100)</label><input id="f-target" type="number" min="0" max="100" value="${s.target_level??100}" /></div>
+    <div class="form-group">
+      <label>Current Level: <span id="fl-current">${s.current_level ?? 0}</span></label>
+      <div class="slider-row">
+        <input type="range" min="0" max="100" value="${s.current_level ?? 0}" id="f-current"
+          oninput="document.getElementById('fl-current').textContent=this.value" />
+        <span class="slider-val">${s.current_level ?? 0}</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Target Level: <span id="fl-target">${s.target_level ?? 100}</span></label>
+      <div class="slider-row">
+        <input type="range" min="0" max="100" value="${s.target_level ?? 100}" id="f-target"
+          oninput="document.getElementById('fl-target').textContent=this.value" />
+        <span class="slider-val">${s.target_level ?? 100}</span>
+      </div>
+    </div>
     <div class="form-group"><label>Status</label>
       <select id="f-status">
         <option value="learning" ${s.status==='learning'?'selected':''}>Learning</option>

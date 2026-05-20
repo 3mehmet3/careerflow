@@ -6,12 +6,21 @@ function openModal(title, html) {
 }
 function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
+// Sidebar mobile
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.querySelector('.sidebar-overlay').classList.toggle('open');
+}
+
 // Navigation
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
   document.getElementById(`page-${page}`).classList.remove('hidden');
   document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+  document.querySelector('.sidebar').classList.remove('open');
+  document.querySelector('.sidebar-overlay').classList.remove('open');
 
   if (page === 'skills') loadSkills();
   else if (page === 'goals') loadGoals();
@@ -26,14 +35,37 @@ async function loadDashboard() {
       api.goals.getAll(),
       api.projects.getAll(),
     ]);
+
     const completedGoals = goals.filter(g => g.completed).length;
     const activeProjects = projects.filter(p => p.status === 'active').length;
+    const avgSkill = skills.length ? Math.round(skills.reduce((s, k) => s + k.current_level, 0) / skills.length) : 0;
+
     document.getElementById('stats-grid').innerHTML = `
       <div class="stat-card"><div class="stat-number">${skills.length}</div><div class="stat-label">Skills tracked</div></div>
-      <div class="stat-card"><div class="stat-number">${goals.length}</div><div class="stat-label">Career goals</div></div>
-      <div class="stat-card"><div class="stat-number">${completedGoals}</div><div class="stat-label">Goals completed</div></div>
+      <div class="stat-card"><div class="stat-number">${avgSkill}</div><div class="stat-label">Avg skill level</div></div>
+      <div class="stat-card"><div class="stat-number">${completedGoals}/${goals.length}</div><div class="stat-label">Goals completed</div></div>
       <div class="stat-card"><div class="stat-number">${activeProjects}</div><div class="stat-label">Active projects</div></div>
     `;
+
+    const topSkills = [...skills].sort((a,b) => b.current_level - a.current_level).slice(0, 5);
+    document.getElementById('dash-skills').innerHTML = topSkills.length
+      ? topSkills.map(s => `
+        <div class="skill-bar-item">
+          <span>${s.name}</span>
+          <div class="progress-bar"><div class="progress-fill" style="width:${s.current_level}%"></div></div>
+          <span>${s.current_level}</span>
+        </div>`).join('')
+      : '<p style="color:var(--muted);font-size:0.85rem">No skills yet</p>';
+
+    const activeGoals = goals.filter(g => !g.completed).slice(0, 4);
+    document.getElementById('dash-goals').innerHTML = activeGoals.length
+      ? activeGoals.map(g => `
+        <div class="goal-item">
+          <div class="goal-item-text">${g.title}</div>
+          <div class="goal-item-pct">${g.progress}%</div>
+        </div>`).join('')
+      : '<p style="color:var(--muted);font-size:0.85rem">No active goals</p>';
+
   } catch(e) { console.error(e); }
 }
 
@@ -54,7 +86,6 @@ function logout() {
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
-  // Auth tabs
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -65,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Login form
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.target));
@@ -81,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Register form
   document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.target));
@@ -97,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Nav links
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -105,27 +133,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Page action buttons
   document.getElementById('add-skill-btn').addEventListener('click', openAddSkill);
   document.getElementById('add-goal-btn').addEventListener('click', openAddGoal);
   document.getElementById('add-project-btn').addEventListener('click', openAddProject);
 
-  // Filters
   document.getElementById('skill-search').addEventListener('input', loadSkills);
   document.getElementById('skill-status-filter').addEventListener('change', loadSkills);
   document.getElementById('goal-priority-filter').addEventListener('change', loadGoals);
   document.getElementById('goal-completed-filter').addEventListener('change', loadGoals);
 
-  // Modal close
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('modal')) closeModal();
   });
 
-  // Logout
   document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('hamburger').addEventListener('click', toggleSidebar);
+  document.querySelector('.sidebar-overlay').addEventListener('click', toggleSidebar);
 
-  // Auto-login if token exists
   if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -133,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoggedIn({ name: payload.name, email: payload.email });
         return;
       }
-    } catch { /* invalid token */ }
+    } catch { }
     logout();
   }
 });
